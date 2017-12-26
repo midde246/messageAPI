@@ -2,6 +2,7 @@
 var express = require('express');
 var mongo = require('mongodb').MongoClient;
 var session = require('express-session');
+var jwt = require ('jsonwebtoken');
 var router = express.Router();
 
 //Database url set
@@ -121,17 +122,24 @@ router.post('/testlogin', function(req, res, next){
     //console.log(req.body.email);
 
    //req.session.username = req.body.email;
-   req.session.username = "midde";
+  /*  req.session.username = "midde";
    req.session.success = true;
    
    console.log("Your session has been created as "+ req.session.username); 
-   res.send("Your session has been created as "+ req.session.username); 
-   
+   res.send("Your session has been created as "+ req.session.username);  */
+
+   const user = {id:3};
+   const token = jwt.sign({user}, 'my_secrect_key')
+
+   res.json({
+      message: 'Authenticated! Use this token in the "Authorization" header', 
+      token: token
+   });
 });
 
  
-router.get('/checkSession', function(req, res, next){
-   console.log(req.session.success); 
+router.get('/checkSession',ensureToken, function(req, res, next){
+   /* console.log(req.session.success); 
    if(req.session.username){
    console.log("hello "+req.session.username);    
     res.send("hello "+req.session.username);  
@@ -139,8 +147,30 @@ router.get('/checkSession', function(req, res, next){
    else{
        console.log("session is not SET");
        res.send("session is not SET");
-   }
+   } */
+   jwt.verify(req.token, 'my_secrect_key', function(err, data) {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      res.json({
+        description: 'Protected information. Congrats!'
+      });
+    }
+  });
+
 });
+
+function ensureToken(req, res, next) {
+    const bearerHeader = req.headers["authorization"];
+    if (typeof bearerHeader !== 'undefined') {
+      const bearer = bearerHeader.split(" ");
+      const bearerToken = bearer[1];
+      req.token = bearerToken;
+      next();
+    } else {
+      res.sendStatus(403);
+    }
+}    
 
 router.get('/logout', function(req, res, next){
     req.session.destroy(function(err){
