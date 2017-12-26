@@ -69,6 +69,8 @@ router.get('/', function(req, res, next){
     console.log("HI "+req.body.name+" ! How are you ?");
 }); */
 
+
+/* 
 router.get('/message',function( req, res, next){
      resultArray = []
      //connect to database with remote 
@@ -111,35 +113,44 @@ router.post('/insertMessage', function(req, res, next){
         })
     });   
 });
+ */
 
 
 router.post('/testlogin', function(req, res, next){
-
-   // console.log(req.body);
-   if(req.body.username == 'admin' && req.body.password == 'admin'){
-       console.log("Welcome "+req.body.username);
-       res.send("Welcome "+req.body.username);
-       req.session.authenticated = true;
-       req.session.username = req.body.username;
-       req.session.password = req.body.password;
-       console.log("Set session as "+req.session.username);
-       session.save() 
-   }
-   else {
-       res.send("Who are you ?? ");
-       console.log("Who are you ?? ");
-   }
     
+    //console.log(req.body.email);
+
+   //req.session.username = req.body.email;
+   req.session.username = "midde";
+   req.session.success = true;
+   
+   console.log("Your session has been created as "+ req.session.username); 
+   res.send("Your session has been created as "+ req.session.username); 
+   
 });
 
+ 
 router.get('/checkSession', function(req, res, next){
-   //console.log(req.session); 
-   if(req.session.authenticated == true){
-      console.log(req.session.username);  
+   console.log(req.session.success); 
+   if(req.session.username){
+   console.log("hello "+req.session.username);    
+    res.send("hello "+req.session.username);  
    } 
    else{
        console.log("session is not SET");
+       res.send("session is not SET");
    }
+});
+
+router.get('/logout', function(req, res, next){
+    req.session.destroy(function(err){
+       if(err){
+           console.log("Some error received when to logout");
+       }
+       console.log("You have got logged out successfully");
+       res.send("You have got logged out successfully");
+    });
+
 });
  
 module.exports = router;
