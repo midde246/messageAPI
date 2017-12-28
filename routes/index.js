@@ -80,8 +80,8 @@ router.get('/midde', function(req, res, next){
          res.sendStatus(200);
        });
     });
-   
-    
   });
+
+  router
 
 module.exports = router;

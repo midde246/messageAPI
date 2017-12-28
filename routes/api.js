@@ -118,37 +118,27 @@ router.post('/insertMessage', function(req, res, next){
 
 
 router.post('/testlogin', function(req, res, next){
-    
-    //console.log(req.body.email);
+   console.log(req.body);
+   if(req.body.username == 'midde' && req.body.password == 'midde'){
+        const user = req.body.username;
+        const token = jwt.sign({user}, 'midde_secrect_key')
 
-   //req.session.username = req.body.email;
-  /*  req.session.username = "midde";
-   req.session.success = true;
-   
-   console.log("Your session has been created as "+ req.session.username); 
-   res.send("Your session has been created as "+ req.session.username);  */
-
-   const user = {id:3};
-   const token = jwt.sign({user}, 'my_secrect_key')
-
-   res.json({
-      message: 'Authenticated! Use this token in the "Authorization" header', 
-      token: token
-   });
+        res.json({
+            message: "Authenticated! Use this token in the 'Authorization' header", 
+            token: token
+        });
+   }
+   else{
+       res.json({
+           message: "Wrong credential"
+       });
+   }
 });
 
  
 router.get('/checkSession',ensureToken, function(req, res, next){
-   /* console.log(req.session.success); 
-   if(req.session.username){
-   console.log("hello "+req.session.username);    
-    res.send("hello "+req.session.username);  
-   } 
-   else{
-       console.log("session is not SET");
-       res.send("session is not SET");
-   } */
-   jwt.verify(req.token, 'my_secrect_key', function(err, data) {
+    
+   jwt.verify(req.token, 'midde_secrect_key', function(err, data) {
     if (err) {
       res.sendStatus(403);
     } else {
