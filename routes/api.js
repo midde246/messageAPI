@@ -35,67 +35,75 @@ router.get('/', function(req, res, next){
 }); */
 
 //Signin API route......
-/* router.post('/signin', function(req, res, next){
-    mongo.connect(_dbUrl, function(err, db){
-        if(err){
-            console.log("Problem in connecting with DataBase");
-        }
-        //console.log("database connected");
-        db.collection('Employees').find({
-            $and: [
-                {"email" : req.body.email},{"password": req.body.password}
-            ]
-        }, function(err, result){
-            if(err){
-                console.log("Error in finding data...");
-            }
-            console.log("database sending data successfully");
-            //console.log(result);
-            result.forEach(function(element, err) {
-                if(err){
-                    console.log("Problem on extracting data")
-                }
-               console.log("Here I am !!"); 
-               console.log(element.email + " " + element.name);  
-               res.send(element.name);
-               console.log(element.name);
-            });             
-        });       
+
+router.post('/signin', function(req, res, next){
+    console.log(req.body);
+    resultArray = []
+    mongo.connect(_Rurl, function(err, db){
+      if(err){
+           console.log("Error on connecting database...");
+      }
+   
+      db.collection('user').find({
+             $and: [
+                 {"email" : req.body.email},{"password": req.body.password}
+             ]
+         }, function(err, result){
+          if(err){
+              console.log("Problem on finding data");
+          }
+          result.forEach(element => {
+             resultArray.push(element)
+          }, function(){
+                     if(req.body.username == resultArray[0].username && req.body.password == resultArray[0].password){
+                         const user = req.body.username;
+                         const token = jwt.sign({user}, 'midde_secrect_key')
+                 
+                         res.json({
+                             message: "Authenticated! Use this token in the 'Authorization' header", 
+                             token: token
+                         });
+                 }
+                 else{
+                     res.json({
+                         message: "Wrong credential"
+                     });
+                 }  
+          });
+      });
     });
-}); */
-
-//test APi with session ....
-/* router.post('/demologin', function(req, res, next){
-     
-    console.log("HI "+req.body.name+" ! How are you ?");
-}); */
+ });
+ 
 
 
-/* 
-router.get('/message',function( req, res, next){
+router.get('/message', ensureToken, function( req, res, next){
      resultArray = []
-     //connect to database with remote 
-     mongo.connect(_Rurl, function(err, db){
-        if(err){
-            console.log("Problem in connecting DataBase");
+     jwt.verify(req.token, 'midde_secrect_key', function(err, data) {
+        if (err) {
+          res.sendStatus(403);
+        } else {
+            //connect to database with remote 
+            mongo.connect(_Rurl, function(err, db){
+                if(err){
+                    console.log("Problem in connecting DataBase");
+                }
+                var result = db.collection('message').find()
+                //console.log(result);
+                result.forEach(function(msg, err){
+                    if(err){
+                        console.log(" Problem on extracting data")
+                    }
+                    //console.log(msg);
+                    resultArray.push(msg)             
+                },function(){
+                    res.send(resultArray);
+                });        
+            });   
         }
-        var result = db.collection('message').find()
-        //console.log(result);
-        result.forEach(function(msg, err){
-              if(err){
-                  console.log(" Problem on extracting data")
-              }
-              //console.log(msg);
-              resultArray.push(msg)             
-        },function(){
-            res.send(resultArray);
-            //console.log(resultArray[1]);
-          });        
-    });   
-    //res.send();
-    //console.log(resultArray[0]);
+      });
 });
 
+/*
 router.post('/insertMessage', function(req, res, next){
     //console.log(req.body);
     
@@ -115,25 +123,6 @@ router.post('/insertMessage', function(req, res, next){
     });   
 });
  */
-
-
-router.post('/testlogin', function(req, res, next){
-   console.log(req.body);
-   if(req.body.username == 'midde' && req.body.password == 'midde'){
-        const user = req.body.username;
-        const token = jwt.sign({user}, 'midde_secrect_key')
-
-        res.json({
-            message: "Authenticated! Use this token in the 'Authorization' header", 
-            token: token
-        });
-   }
-   else{
-       res.json({
-           message: "Wrong credential"
-       });
-   }
-});
 
  
 router.get('/checkSession',ensureToken, function(req, res, next){
