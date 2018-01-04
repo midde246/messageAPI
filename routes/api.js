@@ -15,15 +15,15 @@ router.get('/', function(req, res, next){
 });
 
 // Signup API route....
-/* router.post('/signup', function(req, res, next){
+router.post('/signup', function(req, res, next){
      //console.log(req.body);
      
      //connect to database 
-     mongo.connect(_dbUrl, function(err, db){
+     mongo.connect(_Rurl, function(err, db){
          if(err){
              console.log("Problem in connecting DataBase");
          }
-         db.collection('Employees').insert(req.body, function(err, result){
+         db.collection('user').insert(req.body, function(err, result){
              if(err){
                  console.log("Problem on inserting to DataBase");
              }
@@ -32,10 +32,9 @@ router.get('/', function(req, res, next){
              res.sendStatus(200);
          })
      });   
-}); */
+});
 
-//Signin API route......
-
+//Signin and token Generating API route ......
 router.post('/signin', function(req, res, next){
     console.log(req.body);
     resultArray = []
@@ -46,7 +45,7 @@ router.post('/signin', function(req, res, next){
    
       db.collection('user').find({
              $and: [
-                 {"email" : req.body.email},{"password": req.body.password}
+                 {"username" : req.body.username},{"password": req.body.password}
              ]
          }, function(err, result){
           if(err){
@@ -103,26 +102,34 @@ router.get('/message', ensureToken, function( req, res, next){
       });
 });
 
-/*
-router.post('/insertMessage', function(req, res, next){
-    //console.log(req.body);
-    
-    //connect to database 
-    mongo.connect(_Rurl, function(err, db){
-        if(err){
-            console.log("Problem in connecting DataBase");
-        }
-        db.collection('message').insert(req.body, function(err, result){
+
+router.post('/insertMessage', ensureToken, function(req, res, next){
+    console.log(req.body); 
+   // Token verification.....
+   jwt.verify(req.token, 'midde_secrect_key', function(err, data){
+     if(err){
+         res.sendStatus(403);
+     }else{
+         console.log("Hey midde !!")
+        //connect to database 
+        mongo.connect(_Rurl, function(err, db){
             if(err){
-                console.log("Problem on inserting to DataBase");
+                console.log("Problem in connecting DataBase");
             }
-            db.close();
-            console.log("Inserted Successfully !!");
-            res.sendStatus(200);
-        })
-    });   
+            db.collection('message').insert(req.body, function(err, result){
+                if(err){
+                    console.log("Problem on inserting to DataBase");
+                }
+                db.close();
+                console.log("Inserted Successfully !!");
+                res.sendStatus(200);
+            })
+       });   
+     }
+
+   }); 
 });
- */
+
 
  
 router.get('/checkSession',ensureToken, function(req, res, next){
